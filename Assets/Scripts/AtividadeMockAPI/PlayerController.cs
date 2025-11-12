@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Threading.Tasks;
 using TMPro;
 
@@ -8,20 +7,21 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Atributos do Jogador")]
     public int vida = 100;
-    public float vel = 5f;
+    public int qtdItens = 0;
+    public float velocidade = 5f;
 
     [Header("Referências de UI")]
     public TextMeshProUGUI textoAutoSave;
 
-    private GameApiService api;
-    private Jogador jogadorAtual;
+    private LocalApiService api;
+    private Player jogadorAtual;
     private Rigidbody2D rb;
     private Vector2 direcao;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        api = new GameApiService();
+        api = new LocalApiService();
         textoAutoSave.gameObject.SetActive(false);
         CarregarJogador();
     }
@@ -35,20 +35,18 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb.linearVelocity = direcao * vel;
+        rb.linearVelocity = direcao * velocidade;
     }
 
     private async void CarregarJogador()
     {
-        jogadorAtual = await api.GetJogador("1");
+        jogadorAtual = await api.GetPlayerById("1");
 
         if (jogadorAtual != null)
         {
-            int valorVida = 100;
-            if (!int.TryParse(jogadorAtual.Vida, out valorVida))
-                valorVida = 100;
-
-            vida = valorVida;
+            jogadorAtual.Id = "1";
+            int.TryParse(jogadorAtual.Vida, out vida);
+            int.TryParse(jogadorAtual.QuantidadeItens, out qtdItens);
         }
     }
 
@@ -60,15 +58,21 @@ public class PlayerController : MonoBehaviour
             if (vida < 0) vida = 0;
             await AtualizarJogador();
         }
+
+        if (other.CompareTag("Item"))
+        {
+            qtdItens++;
+            await AtualizarJogador();
+            Destroy(other.gameObject);
+            StartCoroutine(ShowAutoSave());
+        }
     }
 
     private async Task AtualizarJogador()
     {
-        if (jogadorAtual == null)
-            jogadorAtual = await api.GetJogador("1");
-
         jogadorAtual.Vida = vida.ToString();
-        await api.AtualizarJogador(jogadorAtual.id, jogadorAtual);
+        jogadorAtual.QuantidadeItens = qtdItens.ToString();
+        await api.UpdatePlayer(jogadorAtual.Id, jogadorAtual);
     }
 
     public System.Collections.IEnumerator ShowAutoSave()

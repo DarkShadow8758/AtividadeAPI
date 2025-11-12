@@ -1284,6 +1284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vida: 100
+  qtdItens: 0
   velocidade: 5
   textoAutoSave: {fileID: 2047486238}
 --- !u!1 &1413499525

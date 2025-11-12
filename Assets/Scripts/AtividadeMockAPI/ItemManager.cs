@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 public class ItemManager : MonoBehaviour
 {
     public static ItemManager Instance;
-    private GameApiService api;
+    private ItemService api; // usa a nova API local
 
     private void Awake()
     {
@@ -16,7 +16,7 @@ public class ItemManager : MonoBehaviour
 
     async void Start()
     {
-        api = new GameApiService();
+        api = new ItemService();
         await ListarItens();
     }
 
@@ -30,7 +30,7 @@ public class ItemManager : MonoBehaviour
             Dano = dano
         };
 
-        await api.AdicionarItem(jogadorId, novoItem);
+        await api.CriarItem(novoItem);
         Debug.Log($"Item '{nome}' adicionado ao jogador {jogadorId}!");
     }
 
